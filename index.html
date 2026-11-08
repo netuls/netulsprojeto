@@ -421,7 +421,7 @@ carregar();
     if(h===1)add(new T.SphereGeometry(.37,28,20),cl,0,.02,-.1,u.head);
     if(h===2){add(new T.ConeGeometry(.36,.85,28),cl,0,.55,0,u.head);add(new T.CylinderGeometry(.52,.52,.04,32),cl,0,.2,0,u.head);add(new T.TorusGeometry(.36,.03,10,32),tr,0,.24,0,u.head).rotation.x=Math.PI/2}
     if(h===3){add(new T.SphereGeometry(.33,24,18),mt(o.hair||0x2a1a10,.8),0,.04,-.08,u.head);add(new T.TorusGeometry(.3,.025,10,32),tr,0,.2,0,u.head).rotation.x=Math.PI/2}
-    const hand=new T.Group();hand.position.set(0,-.95,.06);u.aR.add(hand);prop(o.prop,o,hand,add,tr,dk);
+    
     u.aR.rotation.x=-.5;g.userData=u;return g}
   const CH=[{skin:0xc9a07a,cloth:0x3a2a52,trim:0xc9a25b,head:1,prop:6},{skin:0xb98a68,cloth:0x7a2a1c,trim:0xe0662c,head:3,hair:0x4a1a10,prop:0},{skin:0xd2b08c,cloth:0x1f3a52,trim:0x5ab0d6,head:1,prop:3},{skin:0xc49a74,cloth:0x1e4a3b,trim:0x4aa585,head:2,prop:2},{skin:0xa97c5a,cloth:0x3a3f4b,trim:0xc9a25b,head:0,prop:1},{skin:0xb88563,cloth:0x5a2a22,trim:0xb23a34,head:3,hair:0x2a1a10,prop:4},{skin:0xd0aa86,cloth:0x2b2b30,trim:0xd8cfb8,head:2,prop:5}];
   const M=[0,1,2,3,4,5,6,0],PAL=[[0x120d1a,0x9a78e0],[0x1a0f0a,0xe0662c],[0x0a141c,0x5ab0d6],[0x0a1812,0x4aa585],[0x15120a,0xc9a25b],[0x1a0c0c,0xb23a34],[0x14130f,0xd8cfb8],[0x120d1a,0xc9a25b]];
@@ -468,7 +468,7 @@ carregar();
     // quanto baixar cada braço, conforme a pose em que o modelo veio (T-pose = braços abertos)
     const ang=(a,f)=>{const A=u.B[a],F=u.B[f];if(!A||!F)return 0;const p=new T.Vector3(),q=new T.Vector3();A.getWorldPosition(p);F.getWorldPosition(q);q.sub(p);return Math.atan2(-q.y,Math.abs(q.x))};
     u.dL=1.3-ang("LeftArm","LeftForeArm");u.dR=1.3-ang("RightArm","RightForeArm");
-    ["Left","Right"].forEach(sd=>["Index","Middle","Ring","Pinky"].forEach(f=>[1,2,3].forEach(k=>{const n=sd+"Hand"+f+k,b=u.B[n];if(b){b.quaternion.multiply(qt.setFromAxisAngle(AXX,[.9,.99,.72][k-1]));u.rest[n]=b.quaternion.clone()}})));
+    ["Left","Right"].forEach(sd=>["Index","Middle","Ring","Pinky"].forEach(f=>[1,2,3].forEach(k=>{const n=sd+"Hand"+f+k,b=u.B[n];if(b){b.quaternion.multiply(qt.setFromAxisAngle(AXX,[.35,.45,.3][k-1]));u.rest[n]=b.quaternion.clone()}})));
     return u}
   function loadM(f){return cache[f]||(cache[f]=new Promise((ok,no)=>{if(!gltfL)return no("GLTFLoader ausente");gltfL.load(MODS[f],g=>{const u=rigOf(g.scene);ready[f]=u;ok(u)},undefined,no)}))}
   function freeProp(u){if(u.holder){u.holder.traverse(o=>{if(o.geometry)o.geometry.dispose()});if(u.holder.parent)u.holder.parent.remove(u.holder);u.holder=null}}
@@ -479,8 +479,6 @@ carregar();
     const g=new T.Group(),SC=ALT/u.h;u.scene.scale.setScalar(SC);u.scene.position.y=-u.y0*SC;g.add(u.scene);
     u.mats.forEach(({m,c,k})=>{m.color.copy(c);if(k==="sk")m.color.multiply(new T.Color(lk.sk,lk.sk*.96,lk.sk*.92));else if(k==="ha")m.color.multiply(new T.Color(lk.ha));else if(k==="cl")m.color.multiply(new T.Color(lk.cl))});
     freeProp(u);
-    if(u.B.RightHand){const ho=new T.Group(),mk=u.B.RightHandMiddle1;if(mk)ho.position.copy(mk.position).multiplyScalar(.55);else ho.position.set(0,.07,0);ho.scale.setScalar(1/SC);u.B.RightHand.add(ho);u.holder=ho;
-      prop(o.prop,o,ho,(geo,m,x,y,z,p)=>{const me=new T.Mesh(geo,m);me.position.set(x,y,z);me.castShadow=true;(p||ho).add(me);return me},mt(o.trim,.28,.9),mt(0x18181d,.9))}
     g.userData=u;return g}
   // se o modelo tiver blendshapes (ARKit/Avaturn), a boca abre com a voz e os olhos piscam
   const MJ=["jawOpen","mouthOpen","viseme_aa"],MB=["eyeBlinkLeft","eyeBlinkRight","eyesClosed","blink"];
