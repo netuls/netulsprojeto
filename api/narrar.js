@@ -5,18 +5,22 @@
 // então cada capítulo costuma ser gerado uma única vez.
 const TEXTOS = require("./_textos.json");
 
-// Voz usada em todos os capítulos: Ivan Lima (ID do modelo, o final da URL da voz em fish.audio).
+// Voz padrão: Ivan Lima (ID do modelo, o final da URL da voz em fish.audio).
 const VOZ_PADRAO = "885cb960c75b4dcd8b892518ad7b4c5e";
-// Se quiser uma voz diferente para algum personagem, cole o ID dele aqui. Em branco = usa a VOZ_PADRAO.
-const VOZES = {
-  "Cronista do Reino": "",
-  "Mestra Aurora": "",
-  "Arquiteto Vale": "",
-  "Escriba Sheets": "",
-  "Guardião do Portal": "",
-  "Mestre de Obras": "",
-  "Auditor Real": ""
-};
+
+// Uma voz para cada capítulo, na ordem do site (cap=0 é o capítulo 1, cap=7 é o capítulo 8).
+// Em branco = usa a VOZ_PADRAO (Ivan).
+const VOZES_CAP = [
+  "",                                  // capítulo 1 (cap=0): Ivan
+  "ed7de8309b7f4643932df8f4b56ac988",  // capítulo 2 (cap=1)
+  "03e6eaa7aeb149a1a8d13c166a5d947e",  // capítulo 3 (cap=2)
+  "dece2a4c7f8d476b8da3c3a6707298d4",  // capítulo 4 (cap=3)
+  "102bccca7dc64b6b8f8494c199c5d153",  // capítulo 5 (cap=4)
+  "ed827b0532324b12803bb9344a3a607f",  // capítulo 6 (cap=5)
+  "d339e19362fc42dc8e3f4a6be653ff83",  // capítulo 7 (cap=6)
+  "c1783e806b19495ea2db85ea2847ba01"   // capítulo 8 (cap=7)
+];
+
 const MODELO = "s2.1-pro-free"; // modelo gratuito; com crédito na conta, troque por "s2.1-pro" (o s1 será desativado em 31/12/2026)
 const VELOCIDADE = 0.9; // 1 = normal; 0.5 a 2. Mais baixo = fala mais devagar
 const API = "https://api.fish.audio/v1/tts";
@@ -36,7 +40,7 @@ module.exports = async (req, res) => {
       normalize: true,
       prosody: { speed: VELOCIDADE }
     };
-    corpo.reference_id = VOZES[TEXTOS[cap].w] || VOZ_PADRAO;
+    corpo.reference_id = VOZES_CAP[cap] || VOZ_PADRAO;
     const r = await fetch(API, {
       method: "POST",
       headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json", "model": MODELO },
