@@ -18,6 +18,7 @@ const VOZES = {
   "Auditor Real": ""
 };
 const MODELO = "s2.1-pro-free"; // modelo gratuito; com crédito na conta, troque por "s2.1-pro" (o s1 será desativado em 31/12/2026)
+const VELOCIDADE = 0.9; // 1 = normal; 0.5 a 2. Mais baixo = fala mais devagar
 const API = "https://api.fish.audio/v1/tts";
 
 module.exports = async (req, res) => {
@@ -32,7 +33,8 @@ module.exports = async (req, res) => {
       format: "mp3",
       mp3_bitrate: 128,
       latency: "normal",
-      normalize: true
+      normalize: true,
+      prosody: { speed: VELOCIDADE }
     };
     corpo.reference_id = VOZES[TEXTOS[cap].w] || VOZ_PADRAO;
     const r = await fetch(API, {
