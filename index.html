@@ -448,7 +448,7 @@ carregar();
     R.render(S,cam)}
   function start(){if(!raf)raf=requestAnimationFrame(loop)}
   // personagens 3D (arquivos .glb da pasta modelos/, com nomes em minúsculas); se não carregarem, volta para a figura simples
-  const ALT=2.87,MODS=["modelos/model1.glb","modelos/model2.glb","modelos/model3.glb","modelos/bobo.glb","modelos/diferente.glb","modelos/harry.glb","modelos/lutador.glb","modelos/padre.glb"];
+  const ALT=2.87,MODS=["modelos/model1.glb","modelos/mode12.glb","modelos/mode13.glb","modelos/bobo.glb","modelos/diferente.glb","modelos/harry.glb","modelos/lutador.glb","modelos/padre.glb"];
   // um item por personagem, na mesma ordem de CH: f = posição do modelo na lista MODS acima (0 = model1 ... 7 = padre).
   // Para trocar o rosto de alguém, mude só o número f. sk/ha/cl = tom de pele, cabelo e roupa (o padrão não altera nada).
   const LOOK=[{f:7},{f:1},{f:5},{f:2},{f:6},{f:3},{f:4}].map(l=>({sk:1,ha:0xffffff,cl:0xffffff,...l}));
@@ -538,7 +538,7 @@ carregar();
   ];
   const bar=$("sgChs"),pt=$("sgPt"),tx=$("sgTx"),sc=$("sgSc");let i=0,tm=null,full="";
   C.forEach((c,j)=>{const b=document.createElement("button");b.textContent=c.n;b.title=c.t;b.onclick=()=>go(j);bar.appendChild(b)});
-  // narração com ElevenLabs: toca audio/cap0.mp3, cap1.mp3... (gerados com gerar-audios.js); sem o arquivo, só digita o texto
+  // narração com Fish Audio: tenta audio/cap0.mp3, cap1.mp3... e, se não existir, gera pela função api/narrar; sem áudio, só digita o texto
   const au=new Audio();au.preload="auto";let ac=null,an=null,fb=null,lvT=0,sayId=0,armed=false,muted=false;
   try{muted=localStorage.getItem("sgMute")==="1"}catch(e){}
   const mu=document.createElement("button");mu.className="sgmu";mu.id="sgMu";$("sgSt").appendChild(mu);
