@@ -9,13 +9,13 @@ const TEXTOS = require("./_textos.json");
 // Em branco = a Fish usa a voz padrão (que pode soar diferente a cada geração).
 // Dica: preencha todos, assim as vozes nunca mudam entre uma geração e outra.
 const VOZES = {
-  "Cronista do Reino": "",
-  "Mestra Aurora": "",
-  "Arquiteto Vale": "",
-  "Escriba Sheets": "",
-  "Guardião do Portal": "",
-  "Mestre de Obras": "",
-  "Auditor Real": ""
+  "Cronista do Reino": "885cb960c75b4dcd8b892518ad7b4c5e",
+  "Mestra Aurora": "885cb960c75b4dcd8b892518ad7b4c5e",
+  "Arquiteto Vale": "885cb960c75b4dcd8b892518ad7b4c5e",
+  "Escriba Sheets": "885cb960c75b4dcd8b892518ad7b4c5e",
+  "Guardião do Portal": "885cb960c75b4dcd8b892518ad7b4c5e",
+  "Mestre de Obras": "885cb960c75b4dcd8b892518ad7b4c5e",
+  "Auditor Real": "885cb960c75b4dcd8b892518ad7b4c5e"
 };
 const MODELO = "s2.1-pro"; // o s1 será desativado em 31/12/2026
 const API = "https://api.fish.audio/v1/tts";
