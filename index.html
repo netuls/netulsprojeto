@@ -440,9 +440,12 @@ carregar();
     if(cur){const u=cur.userData;
       cur.position.x+=(-1.5-cur.position.x)*.07;cur.rotation.y+=(.35+mx*.25-cur.rotation.y)*.05;
       if(u.glb)anim(u,s,tk,mx,my);else{u.torso.scale.y=1+Math.sin(s*2)*.015;u.cape.rotation.x=Math.sin(s*1.6)*.03;
-      u.head.rotation.y+=(mx*.45-u.head.rotation.y)*.08;u.head.rotation.x+=(my*.25+(tk?Math.sin(s*6)*.05:0)-u.head.rotation.x)*.08;
+      const e=u.env=(u.env||0)+((tk?1:0)-(u.env||0))*.06,gR=Math.sin(s*1.7)*.6+Math.sin(s*2.9+1.3)*.4,gL=Math.sin(s*1.5+2.1)*.6+Math.sin(s*2.3+.4)*.4;
+      u.head.rotation.y+=(mx*.45+e*Math.sin(s*.7)*.08-u.head.rotation.y)*.08;u.head.rotation.x+=(my*.25+e*Math.sin(s*2.4)*.05-u.head.rotation.x)*.08;
       u.mouth.scale.y=tk?1+(Math.sin(s*20)*.5+.5)*4:1;
-      u.aR.rotation.x=-.5+(tk?Math.sin(s*5)*.14:Math.sin(s*1.2)*.03);u.aL.rotation.z=.08+Math.sin(s*1.3)*.03}}
+      u.aR.rotation.x=-.5-e*(.08+gR*.14)+(1-e)*Math.sin(s*1.2)*.03;u.aR.rotation.z=e*Math.sin(s*1.1+.7)*.1;
+      u.aL.rotation.x=-e*(.3+gL*.18);u.aL.rotation.z=.08+Math.sin(s*1.3)*.03+e*gL*.06;
+      cur.rotation.z=e*Math.sin(s*.9)*.02;cur.position.y=e*Math.sin(s*1.9)*.02}}
     emb.rotation.y=s*.4;emb.rotation.x=s*.2;emb.position.y=2.3+Math.sin(s)*.15;
     const a=pg.attributes.position;for(let i=0;i<N;i++){a.array[i*3+1]+=.004;if(a.array[i*3+1]>5)a.array[i*3+1]=0}a.needsUpdate=true;
     R.render(S,cam)}
@@ -484,14 +487,22 @@ carregar();
   function morph(u,names,v){for(const m of u.morphs){const d=m.morphTargetDictionary;for(const n of names){const i=d[n];if(i!==undefined)m.morphTargetInfluences[i]=v}}}
   // animação do corpo: respiração, balanço, cabeça seguindo o mouse e gestos enquanto fala
   function anim(u,s,tk,mx,my){
-    const lv=tk?(window.sgLevel!=null?window.sgLevel:.5+.5*Math.sin(s*7.3)*Math.sin(s*2.9+1)):0,sw=Math.sin(s*1.3),gs=tk?Math.sin(s*2.2):0,B=u.B;
+    u.env=(u.env||0)+((tk?1:0)-(u.env||0))*.06;
+    const e=u.env,B=u.B,lv0=tk?(window.sgLevel!=null?window.sgLevel:.5+.5*Math.sin(s*7.3)*Math.sin(s*2.9+1)):0;
+    u.lv=(u.lv||0)+(lv0-(u.lv||0))*.25;const lv=u.lv,sw=Math.sin(s*1.3);
+    // gestos: duas ondas lentas somadas, com fases diferentes em cada braço (movimento menos mecânico)
+    const gR=Math.sin(s*1.7)*.6+Math.sin(s*2.9+1.3)*.4,gR2=Math.sin(s*1.1+.7),gL=Math.sin(s*1.5+2.1)*.6+Math.sin(s*2.3+.4)*.4;
     if(u.morphs.length){morph(u,MJ,Math.min(1,lv*.8));if(s>u.nb){u.bs=s;u.nb=s+2.2+Math.random()*3.5}morph(u,MB,Math.max(0,1-Math.abs((s-u.bs)/.09-1)))}
-    setW(u,"Hips",eul(0,Math.sin(s*.6)*.04,0));
+    setW(u,"Hips",eul(0,Math.sin(s*.6)*.04+e*Math.sin(s*.8)*.05,Math.sin(s*.7)*.015));
+    if(B.Spine1)setW(u,"Spine1",eul(0,e*Math.sin(s*.9+.5)*.06,0));
     if(B.Spine2)B.Spine2.quaternion.copy(u.rest.Spine2).multiply(qt.setFromAxisAngle(AXX,Math.sin(s*1.9)*.014-lv*.01));
-    const hy=Math.max(-.55,Math.min(.55,mx*.5)),hx=my*.28+(tk?Math.sin(s*6)*.03*(.4+lv):0);
+    const hy=Math.max(-.55,Math.min(.55,mx*.5))+e*Math.sin(s*.7)*.06,hx=my*.28+e*Math.sin(s*2.4)*.035*(.5+lv);
     setW(u,"Neck",eul(hx*.4,hy*.4,0));setW(u,"Head",eul(hx*.6,hy*.6,0));
-    setW(u,"LeftArm",eul(-(.04+lv*.1),0,-(u.dL+.03*sw)));setW(u,"RightArm",eul(-(.2+lv*.12+gs*.05),0,u.dR-.05));
-    setW(u,"LeftForeArm",eul(-(.15+lv*.3),0,0));setW(u,"RightForeArm",eul(-(.75+lv*.45+gs*.12),0,0));
+    setW(u,"LeftArm",eul(-(.04+e*(.1+lv*.12+gL*.08)),0,-(u.dL+.03*sw-e*(.06+.05*gL))));
+    setW(u,"RightArm",eul(-(.2+e*(lv*.12+gR*.1)),0,u.dR-.05+e*gR2*.06));
+    setW(u,"LeftForeArm",eul(-(.15+e*(.3+gL*.15)),0,0));
+    setW(u,"RightForeArm",eul(-(.75+e*(lv*.35+gR*.2)),0,0));
+    setW(u,"LeftHand",eul(e*gL*.2,0,0));setW(u,"RightHand",eul(e*gR*.25,0,e*gR2*.15));
     if(u.holder){B.RightHand.getWorldQuaternion(qh);u.model.getWorldQuaternion(qd);qd.multiply(qt.setFromEuler(EU.set(.35,0,0,"YXZ")));u.holder.quaternion.copy(qh).invert().multiply(qd)}}
   let tkn=0;
   function drop(){if(cur){S.remove(cur);if(!cur.userData.glb)cur.traverse(o=>{if(o.geometry)o.geometry.dispose()})}}
