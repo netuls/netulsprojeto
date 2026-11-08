@@ -932,7 +932,7 @@ carregar();
       tm=setInterval(()=>{n+=2;tx.textContent=t.slice(0,n);if(n>=t.length)stop()},22)};
     if(muted||!armed){typed();return}
     tx.textContent=reduce?t:"…";
-    const srcs=["audio/cap"+j+".mp3","api/narrar?cap="+j+"&v=5"];let si=0;
+    const srcs=["audio/cap"+j+".mp3","api/narrar?cap="+j+"&v=6"];let si=0;
     const started=()=>{if(my!==sayId)return;ok=true;pt.classList.add("talk");lvStart();
       if(si===1&&j+1<C.length)try{fetch("api/narrar?cap="+(j+1)+"&v=2",{priority:"low"}).catch(()=>{})}catch(e){}};
     const tryPlay=()=>{au.src=srcs[si];au.play().then(started).catch(e=>{if(e&&e.name==="NotAllowedError")typed()})};
