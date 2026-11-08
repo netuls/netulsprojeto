@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Netuls Digital | Crônica dos anúncios</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -179,6 +180,7 @@ body:not(.sm) #saga{display:none}
 <script>
 const URL_FIXA = ""; // opcional: cole aqui a URL /exec
 const KEY="meta-painel-url",LK="meta-painel-nivel";
+const VOZ_V=7; // some 1 aqui sempre que trocar o ID de uma voz
 const $=id=>document.getElementById(id);
 const nf=v=>new Intl.NumberFormat("pt-BR",{notation:v>=100000?"compact":"standard",maximumFractionDigits:1}).format(v||0);
 const brl=v=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(isFinite(v)?v:0);
@@ -914,7 +916,7 @@ carregar();
   ];
   const bar=$("sgChs"),pt=$("sgPt"),tx=$("sgTx"),sc=$("sgSc");let i=0,tm=null,full="";
   C.forEach((c,j)=>{const b=document.createElement("button");b.textContent=c.n;b.title=c.t;b.onclick=()=>go(j);bar.appendChild(b)});
-  // narração com Fish Audio: tenta audio/cap0.mp3, cap1.mp3... e, se não existir, gera pela função api/narrar; sem áudio, só digita o texto
+  // narração com Fish Audio: gerada pela função api/narrar (a versão VOZ_V fica no topo do script); sem áudio, só digita o texto
   const au=new Audio();au.preload="auto";let ac=null,an=null,fb=null,lvT=0,sayId=0,armed=false,muted=false;
   try{muted=localStorage.getItem("sgMute")==="1"}catch(e){}
   const mu=document.createElement("button");mu.className="sgmu";mu.id="sgMu";$("sgSt").appendChild(mu);
@@ -932,9 +934,9 @@ carregar();
       tm=setInterval(()=>{n+=2;tx.textContent=t.slice(0,n);if(n>=t.length)stop()},22)};
     if(muted||!armed){typed();return}
     tx.textContent=reduce?t:"…";
-    const srcs=["audio/cap"+j+".mp3","api/narrar?cap="+j+"&v=7"];let si=0;
+    const srcs=["api/narrar?cap="+j+"&v="+VOZ_V];let si=0;
     const started=()=>{if(my!==sayId)return;ok=true;pt.classList.add("talk");lvStart();
-      if(si===1&&j+1<C.length)try{fetch("api/narrar?cap="+(j+1)+"&v=2",{priority:"low"}).catch(()=>{})}catch(e){}};
+      if(j+1<C.length)try{fetch("api/narrar?cap="+(j+1)+"&v="+VOZ_V,{priority:"low"}).catch(()=>{})}catch(e){}};
     const tryPlay=()=>{au.src=srcs[si];au.play().then(started).catch(e=>{if(e&&e.name==="NotAllowedError")typed()})};
     au.onerror=()=>{if(my!==sayId)return;if(++si<srcs.length)tryPlay();else typed()};
     au.ontimeupdate=()=>{if(my!==sayId||reduce)return;const d=au.duration;if(d&&isFinite(d))tx.textContent=t.slice(0,Math.ceil(t.length*Math.min(1,au.currentTime/d*1.03)))};
