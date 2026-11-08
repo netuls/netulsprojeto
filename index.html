@@ -669,13 +669,22 @@ carregar();
    {arq:"modelos/castelo.glb",ref:"w",tam:40,modo:"centro",ry:0},
    {arq:"modelos/star.glb",ref:"w",tam:50,modo:"centro",ry:0},
    {arq:"modelos/2igreja.glb",ref:"h",tam:15,modo:"fora",ry:0,claro:true}];
-  const RC={};
+  const RC={},RCAST=new T.Raycaster(),RDOWN=new T.Vector3(0,-1,0);
   function escApply(j,g,m){const E=ESC[j];
     m.rotation.set(0,(E.ry||0)*Math.PI/180,0);m.scale.setScalar(1);m.position.set(0,0,0);m.updateMatrixWorld(true);
     const bb=new T.Box3().setFromObject(m),sz=new T.Vector3();bb.getSize(sz);
     const k=E.tam/Math.max(.1,E.ref==="h"?sz.y:Math.max(sz.x,sz.z));m.scale.setScalar(k);m.updateMatrixWorld(true);bb.setFromObject(m);
     const cx=(bb.min.x+bb.max.x)/2,cz=(bb.min.z+bb.max.z)/2,dz=E.modo==="fora"?-3.5-bb.max.z:E.modo==="dentro"?-8-cz:-1.2-cz;
-    m.position.set(-1.5-cx+(E.x||0),-bb.min.y+(E.y||0),dz+(E.z||0));
+    // acha o chão perto do personagem: raios de cima para baixo, ignorando cúpulas de céu; usa o nível mais baixo e frequente (evita pôr o personagem enterrado ou sobre telhados)
+    let gy=bb.min.y;
+    if(E.modo!=="dentro"){try{const ms=[],W2=Math.max(sz.x,sz.z)*k,H2=sz.y*k;
+      m.traverse(o=>{if(o.isMesh){const s2=new T.Vector3();new T.Box3().setFromObject(o).getSize(s2);if(!(s2.y>.4*H2&&Math.max(s2.x,s2.z)>.7*W2))ms.push(o)}});
+      if(!ms.length)m.traverse(o=>{if(o.isMesh)ms.push(o)});
+      const hy=[],ox=cx-(E.x||0),oz=-(dz+(E.z||0));
+      for(let i=-2;i<=2;i++)for(let q=-2;q<=2;q++){RCAST.set(new T.Vector3(ox+i*2.5,bb.max.y+1,oz+q*2.5),RDOWN);const h=RCAST.intersectObjects(ms,false);if(h.length)hy.push(h[0].point.y)}
+      if(hy.length){hy.sort((a,b)=>a-b);gy=hy[Math.floor(hy.length*.25)]}}catch(e){console.warn("chão",e)}}
+    console.log("cenário "+E.arq+": tamanho "+(sz.x*k).toFixed(1)+" x "+(sz.y*k).toFixed(1)+" x "+(sz.z*k).toFixed(1)+", chão em y="+gy.toFixed(2)+" (base do modelo "+bb.min.y.toFixed(2)+")");
+    m.position.set(-1.5-cx+(E.x||0),-gy+(E.y||0),dz+(E.z||0));
     while(g.children.length)g.remove(g.children[0]);g.userData.an=[];g.userData.fl=[];
     g.add(m);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
     lt(g,0xffe6c0,.9,20,-1.5,6,2);flo.position.y=-.03;E.on=true;
