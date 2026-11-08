@@ -430,13 +430,31 @@ carregar();
   function rz(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;R.setSize(w,h,false);cam.aspect=w/h;bz=cam.aspect<1.3?7.4+(1.3-cam.aspect)*5:7.4;cam.updateProjectionMatrix()}
   new ResizeObserver(rz).observe(cv);rz();
   addEventListener("mousemove",e=>{mx=e.clientX/innerWidth*2-1;my=e.clientY/innerHeight*2-1});
+  // direção de câmera: trilho de planos com Catmull-Rom (velocidade contínua, sem paradas bruscas),
+  // dolly de abertura, órbita, travelling, planos baixos/altos e suavização por tempo (sem tremor)
+  // cada plano: [órbita (rad), distância, altura da câmera, altura do alvo, x do alvo, campo de visão]
+  const K=[[0,8.2,2.4,1.7,-.5,32],[.55,5.6,2,1.8,-1.3,30],[.25,3,2.55,2.45,-1.5,26],[-.45,4.6,.9,2,-1.5,34],[-.95,6.4,4.2,1.5,-.8,30],[-.2,8.8,3,2,.3,30],[.7,4,1.9,1.7,-1.5,28],[.35,6,1.2,1.8,-1.3,32]],SEG=5.5;
+  let t0=null,lt=0;const cp=new T.Vector3(),ct=new T.Vector3(),PK=[0,0,0,0,0,0];
+  function shot(u){const n=K.length,x=u/SEG,i=Math.floor(x),f=x-i,f2=f*f,f3=f2*f,a=K[(i+n-1)%n],b=K[i%n],c=K[(i+1)%n],d=K[(i+2)%n];
+    for(let k=0;k<6;k++)PK[k]=.5*(2*b[k]+(-a[k]+c[k])*f+(2*a[k]-5*b[k]+4*c[k]-d[k])*f2+(-a[k]+3*b[k]-3*c[k]+d[k])*f3)}
+  function camDir(s){
+    const first=t0===null;if(first){t0=s;lt=s}
+    const dt=Math.min(.05,s-lt);lt=s;const u=s-t0;shot(u);
+    const k0=Math.min(1,u/4.5),ex=Math.pow(1-k0,3); // dolly in de abertura: começa longe e alto e desacelera até o plano 1
+    const sf=bz/7.4,az=PK[0]+mx*.1+Math.sin(s*.31)*.03,rad=(PK[1]+ex*3.4)*sf,h=PK[2]+ex*1.2-my*.1+Math.sin(s*.43)*.04;
+    const dx=PK[4]+Math.sin(az)*rad,dz=Math.cos(az)*rad,tx=PK[4],ty=PK[3]+Math.sin(s*.37)*.03,fov=PK[5]+ex*5;
+    if(first){cp.set(dx,h,dz);ct.set(tx,ty,0);cam.fov=fov}
+    else{const kp=1-Math.exp(-dt*3.5),kt=1-Math.exp(-dt*5);
+      cp.x+=(dx-cp.x)*kp;cp.y+=(h-cp.y)*kp;cp.z+=(dz-cp.z)*kp;
+      ct.x+=(tx-ct.x)*kt;ct.y+=(ty-ct.y)*kt;cam.fov+=(fov-cam.fov)*kt}
+    cam.position.copy(cp);const r=Math.sin(s*.23)*.012;cam.up.set(Math.sin(r),Math.cos(r),0);cam.lookAt(ct);cam.updateProjectionMatrix()}
   function loop(t){
     if(!document.body.classList.contains("sm")){raf=0;return}
     raf=requestAnimationFrame(loop);const s=t/1000,tk=ptEl.classList.contains("talk");
     S.background.lerp(tg.bg,.04);S.fog.color.copy(S.background);key.color.lerp(tg.lc,.05);rim.color.lerp(tg.lc,.05);ringM.color.lerp(tg.lc,.05);
     emb.material.color.lerp(tg.lc,.05);emb.material.emissive.copy(emb.material.color).multiplyScalar(.25);
     rim.intensity=1.3+Math.sin(s*2)*.08;
-    cam.position.x+=(mx*.8-cam.position.x)*.05;cam.position.y+=(2.2-my*.4-cam.position.y)*.05;cam.position.z+=(bz-cam.position.z)*.05;cam.lookAt(0,1.7,0);
+    camDir(s);
     if(cur){const u=cur.userData;
       cur.position.x+=(-1.5-cur.position.x)*.07;cur.rotation.y+=(.35+mx*.25-cur.rotation.y)*.05;
       if(u.glb)anim(u,s,tk,mx,my);else{u.torso.scale.y=1+Math.sin(s*2)*.015;u.cape.rotation.x=Math.sin(s*1.6)*.03;
@@ -506,7 +524,7 @@ carregar();
     if(u.holder){B.RightHand.getWorldQuaternion(qh);u.model.getWorldQuaternion(qd);qd.multiply(qt.setFromEuler(EU.set(.35,0,0,"YXZ")));u.holder.quaternion.copy(qh).invert().multiply(qd)}}
   let tkn=0;
   function drop(){if(cur){S.remove(cur);if(!cur.userData.glb)cur.traverse(o=>{if(o.geometry)o.geometry.dispose()})}}
-  window.sg3d={start,show(j){
+  window.sg3d={start,show(j){if(j===0)t0=null;
     const id=M[j],o=CH[id],lk=LOOK[id],me=++tkn,nx=M[j+1]!==undefined?LOOK[M[j+1]].f:-1,keep=[lk.f,nx];drop();
     if(ready[lk.f]){cur=glbGroup(ready[lk.f],o,lk);evict(keep)}
     else{cur=build(o);loadM(lk.f).then(u=>{if(me!==tkn)return;const x=cur.position.x,r=cur.rotation.y;drop();cur=glbGroup(u,o,lk);cur.position.set(x,0,0);cur.rotation.y=r;S.add(cur);evict(keep)}).catch(e=>console.warn("modelo 3D não carregou ("+MODS[lk.f]+"); usando a figura simples",e))}
