@@ -447,44 +447,59 @@ carregar();
     const a=pg.attributes.position;for(let i=0;i<N;i++){a.array[i*3+1]+=.004;if(a.array[i*3+1]>5)a.array[i*3+1]=0}a.needsUpdate=true;
     R.render(S,cam)}
   function start(){if(!raf)raf=requestAnimationFrame(loop)}
-  // personagens 3D (arquivos .glb da pasta modelos/); se não carregarem, volta para a figura simples
-  const SC=1.55,MODS=["modelos/model1.glb","modelos/model2.glb","modelos/model3.glb"];
-  const LOOK=[{f:0,sk:1,ha:0xffffff,cl:0xffffff},{f:1,sk:.92,ha:0xffffff,cl:0xffffff},{f:2,sk:.82,ha:0xffffff,cl:0xffffff},{f:0,sk:.8,ha:0x6a5646,cl:0x9fbfb0},{f:1,sk:.72,ha:0xffffff,cl:0xe0b0b0},{f:2,sk:.88,ha:0xffffff,cl:0xb0c0e8},{f:0,sk:.95,ha:0xc8c0b8,cl:0xc8c0b8}];
+  // personagens 3D (arquivos .glb da pasta modelos/, com nomes em minúsculas); se não carregarem, volta para a figura simples
+  const ALT=2.87,MODS=["modelos/model1.glb","modelos/model2.glb","modelos/model3.glb","modelos/bobo.glb","modelos/diferente.glb","modelos/harry.glb","modelos/lutador.glb","modelos/padre.glb"];
+  // um item por personagem, na mesma ordem de CH: f = posição do modelo na lista MODS acima (0 = model1 ... 7 = padre).
+  // Para trocar o rosto de alguém, mude só o número f. sk/ha/cl = tom de pele, cabelo e roupa (o padrão não altera nada).
+  const LOOK=[{f:7},{f:1},{f:5},{f:2},{f:6},{f:3},{f:4}].map(l=>({sk:1,ha:0xffffff,cl:0xffffff,...l}));
   const gltfL=T.GLTFLoader?new T.GLTFLoader():null,cache={},ready={};
   const qm=new T.Quaternion(),qp=new T.Quaternion(),qr=new T.Quaternion(),qa=new T.Quaternion(),qh=new T.Quaternion(),qd=new T.Quaternion(),qt=new T.Quaternion(),EU=new T.Euler(),AXX=new T.Vector3(1,0,0);
-  const eul=(x,y,z)=>qa.setFromEuler(EU.set(x,y,z,"YXZ"));
+  const eul=(x,y,z)=>qa.setFromEuler(EU.set(x,y,z,"YXZ")),nm=n=>n.replace(/^mixamorig[:_]?/i,"");
   // aplica uma rotação no espaço do personagem (eixos fixos: X frente/trás, Y giro, Z abrir/fechar), por cima da pose de repouso do osso
   function setW(u,n,qw){const b=u.B[n];if(!b)return;u.model.getWorldQuaternion(qm);b.parent.getWorldQuaternion(qp);qr.copy(qm).invert().multiply(qp);b.quaternion.copy(qr).invert().multiply(qw).multiply(qr).multiply(u.rest[n])}
-  function rigOf(sc){const u={B:{},rest:{},mats:[],glb:true,scene:sc,model:sc};
-    sc.traverse(o=>{if(o.isBone){u.B[o.name]=o;u.rest[o.name]=o.quaternion.clone()}
-      if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const k=/body/.test(o.name)?"sk":/hair/.test(o.name)?"ha":/look/.test(o.name)?"cl":"";(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(m&&m.color)u.mats.push({m,c:m.color.clone(),k})})}});
-    ["Left","Right"].forEach(sd=>["Index","Middle","Ring","Pinky"].forEach(f=>[1,2,3].forEach(k=>{const b=u.B[sd+"Hand"+f+k];if(b){b.quaternion.multiply(qt.setFromAxisAngle(AXX,[.9,.99,.72][k-1]));u.rest[b.name]=b.quaternion.clone()}})));
+  function rigOf(sc){const u={B:{},rest:{},mats:[],morphs:[],glb:true,scene:sc,model:sc,nb:0,bs:-9};
+    sc.scale.setScalar(1);sc.position.set(0,0,0);sc.updateMatrixWorld(true);
+    sc.traverse(o=>{if(o.isBone){const n=nm(o.name);u.B[n]=o;u.rest[n]=o.quaternion.clone()}
+      if(o.isMesh){o.castShadow=true;o.frustumCulled=false;if(o.morphTargetDictionary&&o.morphTargetInfluences)u.morphs.push(o);const k=/body/i.test(o.name)?"sk":/hair/i.test(o.name)?"ha":/look|cloth/i.test(o.name)?"cl":"";(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(m&&m.color)u.mats.push({m,c:m.color.clone(),k})})}});
+    const bb=new T.Box3().setFromObject(sc);u.h=Math.max(.1,bb.max.y-bb.min.y);u.y0=bb.min.y;
+    // quanto baixar cada braço, conforme a pose em que o modelo veio (T-pose = braços abertos)
+    const ang=(a,f)=>{const A=u.B[a],F=u.B[f];if(!A||!F)return 0;const p=new T.Vector3(),q=new T.Vector3();A.getWorldPosition(p);F.getWorldPosition(q);q.sub(p);return Math.atan2(-q.y,Math.abs(q.x))};
+    u.dL=1.3-ang("LeftArm","LeftForeArm");u.dR=1.3-ang("RightArm","RightForeArm");
+    ["Left","Right"].forEach(sd=>["Index","Middle","Ring","Pinky"].forEach(f=>[1,2,3].forEach(k=>{const n=sd+"Hand"+f+k,b=u.B[n];if(b){b.quaternion.multiply(qt.setFromAxisAngle(AXX,[.9,.99,.72][k-1]));u.rest[n]=b.quaternion.clone()}})));
     return u}
   function loadM(f){return cache[f]||(cache[f]=new Promise((ok,no)=>{if(!gltfL)return no("GLTFLoader ausente");gltfL.load(MODS[f],g=>{const u=rigOf(g.scene);ready[f]=u;ok(u)},undefined,no)}))}
-  MODS.forEach((_,f)=>loadM(f).catch(e=>console.warn("modelo 3D não carregou ("+MODS[f]+"); usando a figura simples",e)));
   function freeProp(u){if(u.holder){u.holder.traverse(o=>{if(o.geometry)o.geometry.dispose()});if(u.holder.parent)u.holder.parent.remove(u.holder);u.holder=null}}
+  // libera da memória os modelos que não são o atual nem o próximo (os arquivos são pesados)
+  function disposeU(u){freeProp(u);u.scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.skeleton)o.skeleton.dispose();(Array.isArray(o.material)?o.material:o.material?[o.material]:[]).forEach(m=>{for(const k in m){const v=m[k];if(v&&v.isTexture)v.dispose()}m.dispose()})})}
+  function evict(keep){Object.keys(ready).forEach(f=>{if(!keep.includes(+f)){disposeU(ready[f]);delete ready[f];delete cache[f]}})}
   function glbGroup(u,o,lk){
-    const g=new T.Group();u.scene.scale.setScalar(SC);g.add(u.scene);
+    const g=new T.Group(),SC=ALT/u.h;u.scene.scale.setScalar(SC);u.scene.position.y=-u.y0*SC;g.add(u.scene);
     u.mats.forEach(({m,c,k})=>{m.color.copy(c);if(k==="sk")m.color.multiply(new T.Color(lk.sk,lk.sk*.96,lk.sk*.92));else if(k==="ha")m.color.multiply(new T.Color(lk.ha));else if(k==="cl")m.color.multiply(new T.Color(lk.cl))});
     freeProp(u);
     if(u.B.RightHand){const ho=new T.Group();ho.position.set(0,.07,0);ho.scale.setScalar(1/SC);u.B.RightHand.add(ho);u.holder=ho;
       prop(o.prop,o,ho,(geo,m,x,y,z,p)=>{const me=new T.Mesh(geo,m);me.position.set(x,y,z);me.castShadow=true;(p||ho).add(me);return me},mt(o.trim,.28,.9),mt(0x18181d,.9))}
     g.userData=u;return g}
+  // se o modelo tiver blendshapes (ARKit/Avaturn), a boca abre com a voz e os olhos piscam
+  const MJ=["jawOpen","mouthOpen","viseme_aa"],MB=["eyeBlinkLeft","eyeBlinkRight","eyesClosed","blink"];
+  function morph(u,names,v){for(const m of u.morphs){const d=m.morphTargetDictionary;for(const n of names){const i=d[n];if(i!==undefined)m.morphTargetInfluences[i]=v}}}
   // animação do corpo: respiração, balanço, cabeça seguindo o mouse e gestos enquanto fala
   function anim(u,s,tk,mx,my){
     const lv=tk?(window.sgLevel!=null?window.sgLevel:.5+.5*Math.sin(s*7.3)*Math.sin(s*2.9+1)):0,sw=Math.sin(s*1.3),gs=tk?Math.sin(s*2.2):0,B=u.B;
+    if(u.morphs.length){morph(u,MJ,Math.min(1,lv*.8));if(s>u.nb){u.bs=s;u.nb=s+2.2+Math.random()*3.5}morph(u,MB,Math.max(0,1-Math.abs((s-u.bs)/.09-1)))}
     setW(u,"Hips",eul(0,Math.sin(s*.6)*.04,0));
     if(B.Spine2)B.Spine2.quaternion.copy(u.rest.Spine2).multiply(qt.setFromAxisAngle(AXX,Math.sin(s*1.9)*.014-lv*.01));
     const hy=Math.max(-.55,Math.min(.55,mx*.5)),hx=my*.28+(tk?Math.sin(s*6)*.03*(.4+lv):0);
     setW(u,"Neck",eul(hx*.4,hy*.4,0));setW(u,"Head",eul(hx*.6,hy*.6,0));
-    setW(u,"LeftArm",eul(-(.04+lv*.1),0,-(1.3+.03*sw)));setW(u,"RightArm",eul(-(.2+lv*.12+gs*.05),0,1.25));
+    setW(u,"LeftArm",eul(-(.04+lv*.1),0,-(u.dL+.03*sw)));setW(u,"RightArm",eul(-(.2+lv*.12+gs*.05),0,u.dR-.05));
     setW(u,"LeftForeArm",eul(-(.15+lv*.3),0,0));setW(u,"RightForeArm",eul(-(.75+lv*.45+gs*.12),0,0));
     if(u.holder){B.RightHand.getWorldQuaternion(qh);u.model.getWorldQuaternion(qd);qd.multiply(qt.setFromEuler(EU.set(.35,0,0,"YXZ")));u.holder.quaternion.copy(qh).invert().multiply(qd)}}
   let tkn=0;
   function drop(){if(cur){S.remove(cur);if(!cur.userData.glb)cur.traverse(o=>{if(o.geometry)o.geometry.dispose()})}}
   window.sg3d={start,show(j){
-    const id=M[j],o=CH[id],lk=LOOK[id],me=++tkn;drop();
-    if(ready[lk.f])cur=glbGroup(ready[lk.f],o,lk);else{cur=build(o);loadM(lk.f).then(u=>{if(me!==tkn)return;const x=cur.position.x,r=cur.rotation.y;drop();cur=glbGroup(u,o,lk);cur.position.set(x,0,0);cur.rotation.y=r;S.add(cur)}).catch(()=>{})}
+    const id=M[j],o=CH[id],lk=LOOK[id],me=++tkn,nx=M[j+1]!==undefined?LOOK[M[j+1]].f:-1,keep=[lk.f,nx];drop();
+    if(ready[lk.f]){cur=glbGroup(ready[lk.f],o,lk);evict(keep)}
+    else{cur=build(o);loadM(lk.f).then(u=>{if(me!==tkn)return;const x=cur.position.x,r=cur.rotation.y;drop();cur=glbGroup(u,o,lk);cur.position.set(x,0,0);cur.rotation.y=r;S.add(cur);evict(keep)}).catch(e=>console.warn("modelo 3D não carregou ("+MODS[lk.f]+"); usando a figura simples",e))}
+    if(nx>=0)setTimeout(()=>{if(me===tkn)loadM(nx).catch(()=>{})},1500);
     cur.position.set(-5,0,0);cur.rotation.y=.35;S.add(cur);
     tg.bg.setHex(PAL[j][0]);tg.lc.setHex(PAL[j][1]);emb.geometry.dispose();emb.geometry=GEO[j%GEO.length]();start()}};
 })();
