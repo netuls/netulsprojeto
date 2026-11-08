@@ -655,7 +655,7 @@ carregar();
     skyU.sc.value.setHex(x.sc);skyU.sd.value.set(x.sd[0],x.sd[1],x.sd[2]);skyU.cl.value=x.cl;
     sunL.position.set(-1.5+x.sd[0]*35,x.sd[1]*35,-3+x.sd[2]*35);
     const f=x.ft,t2=getTX(f[0]).clone();t2.repeat.set(f[1],f[1]);t2.needsUpdate=true;const fm=flo.material;if(fm.map&&fm.userData.own)fm.map.dispose();fm.map=t2;fm.bumpMap=t2;fm.bumpScale=3;fm.userData.own=1;fm.roughness=f[2];fm.metalness=f[3];fm.needsUpdate=true;tg.fl.setHex(f[4]);
-    setEnv(Object.assign({},x));if(PALCO){tg.bg.setHex(c.bg).multiplyScalar(.05);tg.top.setHex(0);tg.fd=Math.max(c.fd,.045);skyU.sc.value.setHex(0);skyU.cl.value=0;tg.fl.multiplyScalar(.4)}}
+    const dimC=h=>new T.Color(h).multiplyScalar(.35).getHex();setEnv(PALCO?Object.assign({},x,{ei:Math.min(x.ei,4),et:dimC(x.et),eh:dimC(x.eh),eg:dimC(x.eg)}):Object.assign({},x));if(PALCO){tg.hi=Math.min(c.hi,.5);tg.si=Math.min(c.si,.4);tg.bg.setHex(c.bg).multiplyScalar(.05);tg.top.setHex(0);tg.fd=Math.max(c.fd,.045);skyU.sc.value.setHex(0);skyU.cl.value=0;tg.fl.multiplyScalar(.4)}}
   // ===== cenários reais (arquivos .glb da pasta modelos/): substituem o cenário feito por código quando o arquivo existe =====
   // arq: arquivo | ref: "h" (pela altura) ou "w" (pela maior largura) | tam: tamanho final em unidades (o personagem tem ~2,9)
   // modo: "fora" (personagem diante do modelo), "dentro" (centro do modelo mais atrás) ou "centro" (personagem no meio do modelo)
@@ -669,6 +669,7 @@ carregar();
    {arq:"modelos/castelo.glb",ref:"w",tam:40,modo:"centro",ry:0},
    {arq:"modelos/star.glb",ref:"w",tam:50,modo:"centro",ry:0},
    {arq:"modelos/2igreja.glb",ref:"h",tam:15,modo:"fora",ry:0,claro:true}];
+  const PROPS=false; // true volta varinha, espada, sabre e livro nas mãos
   const PALCO=true; // true = fundo escuro de cinema com só os elementos da história de cada capítulo; false = cenário completo
   const USAR_GLB=false; // true liga os cenários .glb da pasta modelos/ (ainda em ajuste); false usa os cenários feitos por código
   const RC={},RCAST=new T.Raycaster(),RDOWN=new T.Vector3(0,-1,0);
@@ -700,7 +701,10 @@ carregar();
     if(ESC[j+1])setTimeout(()=>{if(curJ===j)rcLoad(j+1)},2500)}
   // palco escuro: esconde o cenário distante e deixa só os elementos da história, com um cone de luz e poeira sobre o personagem
   function palco(j,c){const p=new T.Vector3(),sz=new T.Vector3(),bb=new T.Box3();
-    scn.children.forEach(o=>{if(o.isLight||o.isPoints)return;bb.setFromObject(o);bb.getSize(sz);bb.getCenter(p);if(Math.hypot(p.x+1.5,p.z+1)>7.5||Math.max(sz.x,sz.y,sz.z)>10)o.visible=false});
+    if(j===3){scn.children.forEach(o=>{if(!o.isLight&&!o.isPoints)o.visible=false});
+      const wh=MS(0xe9e2d0,.7);[[-4.5,-2,.6],[.9,-2.3,.8],[-6,-4,.5],[2.7,-4.2,.7],[-3.3,-5.2,.9],[.4,-5.4,.6]].forEach(q=>{cy(scn,.08,.08,q[2],wh,q[0],q[2]/2,q[1],10);flame(scn,q[0],q[2]+.12,q[1],.07)});
+      lt(scn,0xffc27a,1.1,10,-1.5,2,-3)}
+    if(j!==3)scn.children.forEach(o=>{if(o.isLight||o.isPoints)return;bb.setFromObject(o);bb.getSize(sz);bb.getCenter(p);if(Math.hypot(p.x+1.5,p.z+1)>7.5||Math.max(sz.x,sz.y,sz.z)>10)o.visible=false});
     put(scn,new T.ConeGeometry(2.6,9,28,1,true),BM(c.lc,.05),-1.5,4.5,0);put(scn,new T.CircleGeometry(3,32),BM(c.lc,.12),-1.5,.03,0).rotation.x=-Math.PI/2;
     pts(scn,70,4.5,7,4.5,-1.5,0,0,c.lc,.04,0,.07,0)}
   function setScene(j){const c=SCN[j],x=SCX[j];
@@ -731,7 +735,7 @@ carregar();
     const steel=MS(0xcfd5de,.25,.9),wood=MS(0x5a3a1e,.7),gold=MS(0xd4a93c,.3,.9,0x3a2a08);
     if(j===1)att(u,"Head",g=>{const m=MS(0x5a3a1c,.8);cy(g,.36,.36,.03,m,0,.2,0,24);cy(g,.17,.2,.24,m,0,.32,0,20);cy(g,.205,.205,.04,MS(0x2a1a0c),0,.25,0,20)});
     if(j===5)att(u,"Head",g=>{cy(g,.2,.18,.12,gold,0,.36,0,18);for(let a=0;a<6;a++)cone(g,.04,.12,gold,Math.cos(a*1.0472)*.19,.48,Math.sin(a*1.0472)*.19,6)});
-    const hold=fn=>{u.holder=att(u,"RightHand",fn)};
+    const hold=fn=>{if(PROPS)u.holder=att(u,"RightHand",fn)};
     if(j===2)hold(g=>{cy(g,.018,.026,.7,wood,0,.35,0,8);sph(g,.035,BM(0xfff2b0),0,.72,0);lt(g,0xffe9a0,1,5,0,.72,0);const t=new T.Object3D();t.position.set(0,.72,0);g.add(t);u.tip=t});
     if(j===4)hold(g=>{bx(g,.09,1.6,.02,steel,0,.95,0);bx(g,.5,.07,.08,gold,0,.17,0);cy(g,.03,.03,.3,wood,0,0,0,8);sph(g,.05,gold,0,-.17,0)});
     if(j===6)hold(g=>{cy(g,.035,.035,.4,MS(0xbfc5cc,.3,.9),0,0,0,10);const b=new T.Group();b.position.y=.2;b.scale.y=.001;cy(b,.03,.03,1.7,BM(0xcfeeff),0,.85,0,10);cy(b,.075,.075,1.7,BM(0x2f9bff,.3),0,.85,0,10);lt(b,0x2f9bff,2.2,7,0,.85,0);g.add(b);u.blade=b});
@@ -740,16 +744,10 @@ carregar();
 
   // gestos exclusivos por personagem: [abdE,frenteE,antebraçoE, abdD,frenteD,antebraçoD, cabeçaY,cabeçaX,tronco, aceno, inclinação do objeto]
   const IDLE=[1,.04,.15,1,.1,.2,0,0,0,0,0];
-  const GP=[
-   {d:3.4,P:[[.25,.05,.4,.25,.05,.4,0,-.05,0,0,0],[.8,.75,1.9,.8,.75,1.9,0,.18,0,0,0],[1,.05,.2,.55,.2,1.5,.12,-.05,0,0,0],[.4,.35,.7,.4,.35,.7,0,-.08,0,0,0]]},
-   {d:3,P:[[.9,.1,.5,.9,1.1,1.9,.05,-.05,0,0,0],[.85,.05,.9,.85,.05,.9,-.15,.05,0,0,0],[.9,.1,.3,.7,-.15,.6,.15,0,.15,0,0]]},
-   {d:2.6,P:[[.9,.2,.5,.85,.9,1.1,0,.05,0,0,0],[.9,.2,.4,.7,1.9,.5,.2,-.18,0,0,-.2],[.8,1.4,.1,.9,.5,.9,-.25,0,0,0,0],[.9,.1,.4,.9,1.5,.2,0,0,.15,0,.3]]},
-   {d:2.8,P:[[.95,.1,.3,.6,.4,1.6,.1,0,0,1,0],[.7,.7,1,.7,.7,1,0,0,0,0,0],[.9,.1,.3,.85,.35,1.9,-.1,.05,0,0,0],[.95,.1,.4,.95,.1,.4,-.25,0,0,0,0]]},
-   {d:3,P:[[.85,.55,1.1,.8,.9,1.2,0,0,.12,0,0],[.9,.3,.6,.75,2.7,.4,0,-.12,0,0,0],[.9,-.1,.5,.7,1.4,.3,.1,0,-.3,0,.6],[.85,.45,1,.9,.1,.4,0,-.05,0,0,0]]},
-   {d:3.6,ws:[.5,.5],P:[[.95,.05,.2,.55,.25,1.4,0,-.1,0,0,0],[.9,.05,.8,.8,1,.4,.1,-.05,0,0,0],[.9,.1,.3,.85,.45,2,0,0,0,0,0],[.3,.2,.5,.3,.2,.5,0,-.1,0,0,0]]},
-   {d:3.2,P:[[.9,.3,.8,.85,.9,1.3,0,0,.1,0,.5],[.85,1.5,.15,.85,.5,1,.1,0,0,0,.8],[.8,.8,1.2,.75,1.2,1.3,0,0,-.25,0,1],[.9,.2,.5,.7,1,.9,0,-.08,0,0,.35]]},
-   {d:3.4,ws:[1,.2],P:[[.95,.05,.3,.8,.5,1.6,0,.1,0,0,0],[.95,.05,.3,.8,.5,1.6,0,-.3,0,0,0],[.45,.5,.8,.8,.5,1.6,.15,0,0,0,0],[.95,.1,.3,.8,.7,1.9,0,.2,0,0,0]]}];
-  const W=[null,{cx:-1.5,cz:-.2,r:2.3,sp:.42},null,{cx:-1.5,cz:-.2,r:2.2,sp:.4},null,{cx:-1.5,cz:-.2,r:2,sp:.28},null,{cx:-1.5,cz:-.2,r:2.4,sp:.34}];
+  // todos os capítulos usam gestos didáticos e calmos (como o do capítulo 1), em ordens diferentes
+  const DID=[[.25,.05,.4,.25,.05,.4,0,-.05,0,0,0],[.8,.75,1.9,.8,.75,1.9,0,.18,0,0,0],[1,.05,.2,.55,.2,1.5,.12,-.05,0,0,0],[.4,.35,.7,.4,.35,.7,0,-.08,0,0,0],[.7,.6,1.3,.7,.6,1.3,0,0,0,0,0],[.85,1,.5,1,.05,.2,-.15,0,.08,0,0],[1,.05,.2,.85,.45,2,0,.05,0,0,0]];
+  const GP=[0,1,2,3,4,5,6,7].map(j=>({d:3.4+(j%3)*.3,P:DID.slice(j%7).concat(DID.slice(0,j%7))}));
+  const W=[null,null,null,null,null,null,null,null]; // personagens parados (sem caminhada)
   let wph=0,ls=0;
   const angW=d=>Math.atan2(Math.sin(d),Math.cos(d));
   function place(s){const wc=W[curJ];let px=-1.5,pz=0,ry=.35+mx*.25,by=0;
