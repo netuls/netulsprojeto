@@ -13,12 +13,12 @@ const VOZ_PADRAO = "885cb960c75b4dcd8b892518ad7b4c5e";
 const VOZES_CAP = [
   "",                                  // capítulo 1 (cap=0): Ivan
   "3064bbcd3fbe4f34afd4291d24f93235",  // capítulo 2 (cap=1)
-  "03e6eaa7aeb149a1a8d13c166a5d947e",  // capítulo 3 (cap=2)
+  "01b057e7592b4b97a6963423f91f5e22",  // capítulo 3 (cap=2)
   "dece2a4c7f8d476b8da3c3a6707298d4",  // capítulo 4 (cap=3)
-  "102bccca7dc64b6b8f8494c199c5d153",  // capítulo 5 (cap=4)
+  "34a7006fe942447790d5e12a0f2cc13c",  // capítulo 5 (cap=4)
   "4b215a58407c4def88e0892def6421b2",  // capítulo 6 (cap=5)
   "d339e19362fc42dc8e3f4a6be653ff83",  // capítulo 7 (cap=6)
-  "f800d4c9e73b4dbd849be082315629c4"   // capítulo 8 (cap=7)
+  "34a7006fe942447790d5e12a0f2cc13c"   // capítulo 8 (cap=7)
 ];
 
 const MODELO = "s2.1-pro-free"; // modelo gratuito; com crédito na conta, troque por "s2.1-pro" (o s1 será desativado em 31/12/2026)
