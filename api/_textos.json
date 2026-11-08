@@ -1,34 +1,34 @@
 [
  {
   "w": "Cronista do Reino",
-  "t": "Havia um reino com anúncios espalhados por toda parte e nenhuma forma de enxergar o que eles traziam. Para o gestor, era como lutar de olhos vendados. Esta é a história de como o painel de resultados da Netuls Digital foi forjado, do anúncio até o site, passo a passo."
+  "t": "Ouçam, viajantes. Havia um reino onde os anúncios voavam por toda parte, mas ninguém sabia dizer o que eles traziam de volta. Para o gestor, era como lutar de olhos vendados. Até que um dia nasceu a ideia de forjar um painel capaz de enxergar tudo. O caminho era simples de contar: a campanha, o aplicativo da Meta, a planilha com Apps Script e, por fim, o site. Venham comigo, passo a passo."
  },
  {
   "w": "Mestra Aurora",
-  "t": "Tudo começa no Gerenciador de Anúncios. Criei a campanha com objetivo de engajamento ou de seguidores e anotei o I D da conta, o número que vira a c t, sublinhado, um dois três quatro cinco seis sete oito nove no script, aqui só um valor de exemplo. Para mostrar os seguidores dos perfis, guardei também o I D do Instagram profissional e o da Página do Facebook."
+  "t": "Tudo começa no Gerenciador de Anúncios, a minha terra. Foi lá que criei a campanha, com o objetivo de engajamento ou de seguidores. Depois, olhei no topo da tela e anotei o número da conta de anúncios. No script, esse número ganha um prefixo curto na frente, mas o valor que vocês ouviram aqui é só um exemplo. E, para que o painel mostrasse também os seguidores dos perfis, guardei o I D do Instagram profissional e o I D da Página do Facebook. Com esses três tesouros na bolsa, segui viagem."
  },
  {
   "w": "Arquiteto Vale",
-  "t": "Em developers.facebook.com, criei um aplicativo para a A P I de Marketing e gerei o token com a permissão ads read. Para os seguidores, o token também precisa das permissões de Instagram e de Página. Ele dá acesso aos dados da conta, por isso fica em local seguro: nunca vai no site nem em mensagens."
+  "t": "Eu guardo as chaves do reino. Em developers ponto facebook ponto com, construí um aplicativo para a A P I de Marketing e, dele, gerei o token com a permissão ads read. Para os seguidores, o token pediu também as permissões de Instagram e de Página. Mas atenção, viajante: esse token abre as portas dos dados da conta. Por isso ele mora num cofre, as propriedades do script, e jamais viaja no site ou em mensagens. E se algum menu da Meta estiver com outro nome, procure pela permissão ads read e pela opção de gerar token."
  },
  {
   "w": "Escriba Sheets",
-  "t": "Na planilha, abri Extensões, Apps Script, e colei o Código ponto G S. As credenciais ficam nas propriedades do script. Rodei atualizar dados meta uma vez, autorizei o acesso, e a aba Meta Ads se preencheu. Depois rodei criar gatilho diário, e a planilha passou a se atualizar sozinha todo dia às 7 horas."
+  "t": "Eu sou a escriba da planilha, e foi comigo que a mágica ganhou forma. Abri uma planilha no Google Sheets, entrei em Extensões, depois Apps Script, e colei ali o Código ponto G S. No cofre das propriedades do script, deixei o token e o número da conta; e, se quisessem seguidores, também os I Ds do Instagram e da Página. Então rodei atualizar dados meta, autorizei o acesso quando o Google pediu, e vi a aba Meta Ads se encher de números. Depois rodei criar gatilho diário, e a planilha passou a se atualizar sozinha, todo dia, às 7 horas da manhã. Se algum número parecer estranho, rode descobrir ações e confira na aba Debug Ações o que a Meta está devolvendo."
  },
  {
   "w": "Guardião do Portal",
-  "t": "Para o site ler a planilha, publiquei o script como aplicativo da Web, com acesso para qualquer pessoa. A U R L que termina em barra exec é o portal de entrada dos dados. Sempre que o código muda, crio uma nova versão da implantação, senão o site continua vendo a versão antiga."
+  "t": "Eu guardo o portal. Para que o site pudesse ler a planilha, publiquei o script como aplicativo da Web: em Implantar, Nova implantação, escolhi o tipo aplicativo da Web e, em quem tem acesso, marquei qualquer pessoa. Ao final, recebi uma U R L que termina em barra exec. Ela é a porta de entrada dos dados. E lembrem-se: sempre que o código mudar, é preciso criar uma nova versão da implantação, senão o site continuará vendo a versão antiga."
  },
  {
   "w": "Mestre de Obras",
-  "t": "Com a U R L em mãos, colei na constante U R L fixa, no começo do bloco de script do index ponto html. Pela engrenagem do painel também funciona, mas vale só para aquele navegador. Publiquei o arquivo na hospedagem escolhida e confirmei que o topo mostra Atualizado em, com a data e a hora."
+  "t": "Agora é comigo, o mestre de obras. Com a U R L em mãos, abri o index ponto html e colei o endereço na constante U R L fixa, bem no começo do bloco de script. Dá para colar também pela engrenagem do painel, mas aí vale só para aquele navegador. Depois, publiquei o arquivo na hospedagem escolhida, abri o site e conferi se, lá no topo, aparecia Atualizado em, com a data e a hora. Quando apareceu, soube que a ponte estava de pé."
  },
  {
   "w": "Auditor Real",
-  "t": "Antes de apresentar, comparei com o Gerenciador no mesmo período. Impressões, cliques, curtidas e gasto devem bater, e as curtidas do painel são as Reações ao post. O alcance é a soma dos dias, então pode ficar um pouco acima em períodos longos. Se os números estiverem atrasados, rodo atualizar dados meta e atualizo o painel."
+  "t": "Por fim, chego eu, o auditor real, porque nenhuma obra termina sem conferência. Ajustei o período do Gerenciador para o mesmo do painel, por exemplo, os últimos 7 dias, e comparei. Impressões, cliques, curtidas e gasto precisam bater, e as curtidas do painel são as Reações ao post. O alcance é a soma dos dias, então pode ficar um pouco acima do Gerenciador em períodos longos. E, se os números estiverem atrasados, basta rodar atualizar dados meta e atualizar o painel."
  },
  {
   "w": "Cronista do Reino",
-  "t": "O caminho está completo: campanha, aplicativo da Meta, planilha com Apps Script, portal e site. Os números que você verá agora vêm direto da planilha, atualizada todo dia às 7 horas. Se a planilha ainda não estiver conectada, o painel mostra dados de exemplo. Para rever esta história, use a estrela no topo do painel."
+  "t": "E assim, viajantes, o caminho se completou: a campanha, o aplicativo da Meta, a planilha com Apps Script, o portal e o site. Os números que vocês verão agora vêm direto da planilha, que se atualiza sozinha todo dia às 7 horas. Se a planilha ainda não estiver conectada, o painel mostrará dados de exemplo. E, para reviver esta história, basta tocar na estrela, no topo do painel. Que o reino nunca mais lute de olhos vendados."
  }
 ]
