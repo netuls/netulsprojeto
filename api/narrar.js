@@ -6,7 +6,7 @@
 const TEXTOS = require("./_textos.json");
 
 // Voz usada em todos os capítulos: Ivan Lima (ID do modelo, o final da URL da voz em fish.audio).
-const VOZ_PADRAO = "3171384a600d4688932f860ecefd5cc4";
+const VOZ_PADRAO = "885cb960c75b4dcd8b892518ad7b4c5e";
 // Se quiser uma voz diferente para algum personagem, cole o ID dele aqui. Em branco = usa a VOZ_PADRAO.
 const VOZES = {
   "Cronista do Reino": "",
@@ -17,7 +17,7 @@ const VOZES = {
   "Mestre de Obras": "",
   "Auditor Real": ""
 };
-const MODELO = "s2.1-pro"; // o s1 será desativado em 31/12/2026
+const MODELO = "s2.1-pro-free"; // modelo gratuito; com crédito na conta, troque por "s2.1-pro" (o s1 será desativado em 31/12/2026)
 const API = "https://api.fish.audio/v1/tts";
 
 module.exports = async (req, res) => {
