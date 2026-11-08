@@ -1,0 +1,34 @@
+[
+ {
+  "w": "Cronista do Reino",
+  "t": "Havia um reino com anúncios espalhados por toda parte e nenhuma forma de enxergar o que eles traziam. Para o gestor, era como lutar de olhos vendados. Esta é a história de como o painel de resultados da Netuls Digital foi forjado, do anúncio até o site, passo a passo."
+ },
+ {
+  "w": "Mestra Aurora",
+  "t": "Tudo começa no Gerenciador de Anúncios. Criei a campanha com objetivo de engajamento ou de seguidores e anotei o I D da conta, o número que vira a c t, sublinhado, um dois três quatro cinco seis sete oito nove no script, aqui só um valor de exemplo. Para mostrar os seguidores dos perfis, guardei também o I D do Instagram profissional e o da Página do Facebook."
+ },
+ {
+  "w": "Arquiteto Vale",
+  "t": "Em developers.facebook.com, criei um aplicativo para a A P I de Marketing e gerei o token com a permissão ads read. Para os seguidores, o token também precisa das permissões de Instagram e de Página. Ele dá acesso aos dados da conta, por isso fica em local seguro: nunca vai no site nem em mensagens."
+ },
+ {
+  "w": "Escriba Sheets",
+  "t": "Na planilha, abri Extensões, Apps Script, e colei o Código ponto G S. As credenciais ficam nas propriedades do script. Rodei atualizar dados meta uma vez, autorizei o acesso, e a aba Meta Ads se preencheu. Depois rodei criar gatilho diário, e a planilha passou a se atualizar sozinha todo dia às 7 horas."
+ },
+ {
+  "w": "Guardião do Portal",
+  "t": "Para o site ler a planilha, publiquei o script como aplicativo da Web, com acesso para qualquer pessoa. A U R L que termina em barra exec é o portal de entrada dos dados. Sempre que o código muda, crio uma nova versão da implantação, senão o site continua vendo a versão antiga."
+ },
+ {
+  "w": "Mestre de Obras",
+  "t": "Com a U R L em mãos, colei na constante U R L fixa, no começo do bloco de script do index ponto html. Pela engrenagem do painel também funciona, mas vale só para aquele navegador. Publiquei o arquivo na hospedagem escolhida e confirmei que o topo mostra Atualizado em, com a data e a hora."
+ },
+ {
+  "w": "Auditor Real",
+  "t": "Antes de apresentar, comparei com o Gerenciador no mesmo período. Impressões, cliques, curtidas e gasto devem bater, e as curtidas do painel são as Reações ao post. O alcance é a soma dos dias, então pode ficar um pouco acima em períodos longos. Se os números estiverem atrasados, rodo atualizar dados meta e atualizo o painel."
+ },
+ {
+  "w": "Cronista do Reino",
+  "t": "O caminho está completo: campanha, aplicativo da Meta, planilha com Apps Script, portal e site. Os números que você verá agora vêm direto da planilha, atualizada todo dia às 7 horas. Se a planilha ainda não estiver conectada, o painel mostra dados de exemplo. Para rever esta história, use a estrela no topo do painel."
+ }
+]
