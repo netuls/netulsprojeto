@@ -649,14 +649,48 @@ carregar();
    {top:0x04060f,cl:0,sc:0x4fa8ff,sd:[.6,.5,-.8],ei:6,et:0x0a0e24,eh:0x2a3a6a,eg:0x10141c,gr:[0xd8f0ff,1.05,1.15],ft:["metal",13,.3,.7,0xffffff]},
    {top:0x5a96d0,cl:.55,sc:0xfff0cf,sd:[-.3,.8,.5],ei:10,et:0x5a96d0,eh:0xe8f0e8,eg:0x587c40,gr:[0xfffaf0,1.05,1.04],ft:["grass",13,.95,0,0xffffff]}];
   let scn=null,curJ=0,tc=0,bst=null;
-  function setScene(j){const c=SCN[j],x=SCX[j];
-    if(scn){S.remove(scn);scn.traverse(o=>{if(o.geometry)o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];ms.forEach(m=>{m.dispose()})})}
-    scn=c.build();S.add(scn);scn.traverse(o=>{if(o.isMesh&&o.material&&!o.material.isMeshBasicMaterial&&!o.userData.ns){o.castShadow=true;o.receiveShadow=true}});
+  // aplica céu, sol, ambiente, chão e correção de cor de um capítulo
+  function look(c,x){
     tg.bg.setHex(c.bg);tg.lc.setHex(c.lc);tg.fd=c.fd;tg.hi=c.hi;tg.si=c.si;tg.top.setHex(x.top);tg.gt.setHex(x.gr[0]);tg.gs=x.gr[1];tg.gc=x.gr[2];
     skyU.sc.value.setHex(x.sc);skyU.sd.value.set(x.sd[0],x.sd[1],x.sd[2]);skyU.cl.value=x.cl;
     sunL.position.set(-1.5+x.sd[0]*35,x.sd[1]*35,-3+x.sd[2]*35);
     const f=x.ft,t2=getTX(f[0]).clone();t2.repeat.set(f[1],f[1]);t2.needsUpdate=true;const fm=flo.material;if(fm.map&&fm.userData.own)fm.map.dispose();fm.map=t2;fm.bumpMap=t2;fm.bumpScale=3;fm.userData.own=1;fm.roughness=f[2];fm.metalness=f[3];fm.needsUpdate=true;tg.fl.setHex(f[4]);
-    setEnv(Object.assign({},x));burst3(c.tr);
+    setEnv(Object.assign({},x));}
+  // ===== cenários reais (arquivos .glb da pasta modelos/): substituem o cenário feito por código quando o arquivo existe =====
+  // arq: arquivo | ref: "h" (pela altura) ou "w" (pela maior largura) | tam: tamanho final em unidades (o personagem tem ~2,9)
+  // modo: "fora" (personagem diante do modelo), "dentro" (centro do modelo mais atrás) ou "centro" (personagem no meio do modelo)
+  // ry: giro do modelo (0, 90, 180, 270) | x, y, z: ajuste fino de posição | zoom: maior que 1 afasta a câmera, menor aproxima | claro: força céu de dia
+  const ESC=[
+   {arq:"modelos/1greja.glb",ref:"h",tam:15,modo:"fora",ry:0,claro:true},
+   {arq:"modelos/faroeste.glb",ref:"w",tam:40,modo:"centro",ry:0},
+   {arq:"modelos/harryporter.glb",ref:"w",tam:30,modo:"centro",ry:0},
+   {arq:"modelos/amarelo.glb",ref:"w",tam:40,modo:"centro",ry:0},
+   {arq:"modelos/cavaleiro.glb",ref:"w",tam:50,modo:"centro",ry:0},
+   {arq:"modelos/castelo.glb",ref:"w",tam:40,modo:"centro",ry:0},
+   {arq:"modelos/star.glb",ref:"w",tam:50,modo:"centro",ry:0},
+   {arq:"modelos/2igreja.glb",ref:"h",tam:15,modo:"fora",ry:0,claro:true}];
+  const RC={};
+  function escApply(j,g,m){const E=ESC[j];
+    m.rotation.set(0,(E.ry||0)*Math.PI/180,0);m.scale.setScalar(1);m.position.set(0,0,0);m.updateMatrixWorld(true);
+    const bb=new T.Box3().setFromObject(m),sz=new T.Vector3();bb.getSize(sz);
+    const k=E.tam/Math.max(.1,E.ref==="h"?sz.y:Math.max(sz.x,sz.z));m.scale.setScalar(k);m.updateMatrixWorld(true);bb.setFromObject(m);
+    const cx=(bb.min.x+bb.max.x)/2,cz=(bb.min.z+bb.max.z)/2,dz=E.modo==="fora"?-3.5-bb.max.z:E.modo==="dentro"?-8-cz:-1.2-cz;
+    m.position.set(-1.5-cx+(E.x||0),-bb.min.y+(E.y||0),dz+(E.z||0));
+    while(g.children.length)g.remove(g.children[0]);g.userData.an=[];g.userData.fl=[];
+    g.add(m);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+    lt(g,0xffe6c0,.9,20,-1.5,6,2);flo.position.y=-.03;E.on=true;
+    if(E.claro)look(Object.assign({},SCN[j],{bg:0xf0d4aa,fd:.012,hi:1,si:1.15,lc:0xffe4b8}),Object.assign({},SCX[j],{top:0x4a7ab8,cl:.5,sc:0xffe2b0,sd:[.4,.5,-.7],ei:12,et:0x4a7ab8,eh:0xf0d0a8,eg:0x6a5a48,ft:["paving",13,.9,0,0xffffff]}))}
+  function rcDispose(m){m.traverse(o=>{if(o.geometry)o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];ms.forEach(mm=>{for(const k in mm){const v=mm[k];if(v&&v.isTexture)v.dispose()}mm.dispose()})})}
+  function rcLoad(j){const E=ESC[j];if(!E)return null;if(RC[j])return RC[j];if(!T.GLTFLoader)return null;
+    RC[j]=new Promise(ok=>{new T.GLTFLoader().load(E.arq,gl=>ok(gl.scene),undefined,e=>{console.warn("cenário 3D não carregou ("+E.arq+"); usando o cenário simples",e);ok(null)})});return RC[j]}
+  function cena(j,g){const p=rcLoad(j);
+    Object.keys(RC).forEach(k=>{if(+k!==j&&+k!==j+1){const q=RC[k];delete RC[k];q.then(m=>{if(m)rcDispose(m)})}});
+    if(!p)return;p.then(m=>{if(m&&scn===g&&curJ===j)escApply(j,g,m)});
+    if(ESC[j+1])setTimeout(()=>{if(curJ===j)rcLoad(j+1)},2500)}
+  function setScene(j){const c=SCN[j],x=SCX[j];
+    if(scn){S.remove(scn);scn.traverse(o=>{if(o.geometry)o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];ms.forEach(m=>{m.dispose()})})}
+    scn=c.build();S.add(scn);scn.traverse(o=>{if(o.isMesh&&o.material&&!o.material.isMeshBasicMaterial&&!o.userData.ns){o.castShadow=true;o.receiveShadow=true}});ESC.forEach(e=>{e.on=false});cena(j,scn);
+    flo.visible=true;flo.position.y=0;look(c,x);burst3(c.tr);
     const fl=$("sgFl");if(fl){fl.style.setProperty("--fc",c.fc);fl.classList.remove("go");void fl.offsetWidth;fl.classList.add("go")}}
 
   // transição: partículas temáticas em cada troca de universo
@@ -742,7 +776,7 @@ carregar();
     const dt=Math.min(.05,s-lastT);lastT=s;const u=Math.max(0,s-tc);shot(u);
     const k0=Math.min(1,u/4.5),ex=Math.pow(1-k0,3)*(first?1:.7);
     const ox=cur?cur.position.x+1.5:0,oz=cur?cur.position.z:0;
-    const sf=bz/7.4,az=PK[0]+mx*.1+Math.sin(s*.31)*.03,rad=(PK[1]+ex*3.4)*sf,h=PK[2]+ex*1.2-my*.1+Math.sin(s*.43)*.04;
+    const zm=(ESC[curJ]&&ESC[curJ].on&&ESC[curJ].zoom)||1,sf=bz/7.4,az=PK[0]+mx*.1+Math.sin(s*.31)*.03,rad=(PK[1]+ex*3.4)*sf*zm,h=PK[2]+ex*1.2-my*.1+Math.sin(s*.43)*.04;
     const tx=PK[4]+ox,dx=tx+Math.sin(az)*rad,dz=oz+Math.cos(az)*rad,ty=PK[3]+Math.sin(s*.37)*.03,tz=oz*.9,fov=PK[5]+ex*5;
     if(first){cp.set(dx,h,dz);ct.set(tx,ty,tz);cam.fov=fov}
     else{const kp=1-Math.exp(-dt*3.5),kt=1-Math.exp(-dt*5);
