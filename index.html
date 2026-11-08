@@ -655,7 +655,7 @@ carregar();
     skyU.sc.value.setHex(x.sc);skyU.sd.value.set(x.sd[0],x.sd[1],x.sd[2]);skyU.cl.value=x.cl;
     sunL.position.set(-1.5+x.sd[0]*35,x.sd[1]*35,-3+x.sd[2]*35);
     const f=x.ft,t2=getTX(f[0]).clone();t2.repeat.set(f[1],f[1]);t2.needsUpdate=true;const fm=flo.material;if(fm.map&&fm.userData.own)fm.map.dispose();fm.map=t2;fm.bumpMap=t2;fm.bumpScale=3;fm.userData.own=1;fm.roughness=f[2];fm.metalness=f[3];fm.needsUpdate=true;tg.fl.setHex(f[4]);
-    setEnv(Object.assign({},x));}
+    setEnv(Object.assign({},x));if(PALCO){tg.bg.setHex(c.bg).multiplyScalar(.05);tg.top.setHex(0);tg.fd=Math.max(c.fd,.045);skyU.sc.value.setHex(0);skyU.cl.value=0;tg.fl.multiplyScalar(.4)}}
   // ===== cenários reais (arquivos .glb da pasta modelos/): substituem o cenário feito por código quando o arquivo existe =====
   // arq: arquivo | ref: "h" (pela altura) ou "w" (pela maior largura) | tam: tamanho final em unidades (o personagem tem ~2,9)
   // modo: "fora" (personagem diante do modelo), "dentro" (centro do modelo mais atrás) ou "centro" (personagem no meio do modelo)
@@ -669,6 +669,8 @@ carregar();
    {arq:"modelos/castelo.glb",ref:"w",tam:40,modo:"centro",ry:0},
    {arq:"modelos/star.glb",ref:"w",tam:50,modo:"centro",ry:0},
    {arq:"modelos/2igreja.glb",ref:"h",tam:15,modo:"fora",ry:0,claro:true}];
+  const PALCO=true; // true = fundo escuro de cinema com só os elementos da história de cada capítulo; false = cenário completo
+  const USAR_GLB=false; // true liga os cenários .glb da pasta modelos/ (ainda em ajuste); false usa os cenários feitos por código
   const RC={},RCAST=new T.Raycaster(),RDOWN=new T.Vector3(0,-1,0);
   function escApply(j,g,m){const E=ESC[j];
     m.rotation.set(0,(E.ry||0)*Math.PI/180,0);m.scale.setScalar(1);m.position.set(0,0,0);m.updateMatrixWorld(true);
@@ -690,15 +692,20 @@ carregar();
     lt(g,0xffe6c0,.9,20,-1.5,6,2);flo.position.y=-.03;E.on=true;
     if(E.claro)look(Object.assign({},SCN[j],{bg:0xf0d4aa,fd:.012,hi:1,si:1.15,lc:0xffe4b8}),Object.assign({},SCX[j],{top:0x4a7ab8,cl:.5,sc:0xffe2b0,sd:[.4,.5,-.7],ei:12,et:0x4a7ab8,eh:0xf0d0a8,eg:0x6a5a48,ft:["paving",13,.9,0,0xffffff]}))}
   function rcDispose(m){m.traverse(o=>{if(o.geometry)o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];ms.forEach(mm=>{for(const k in mm){const v=mm[k];if(v&&v.isTexture)v.dispose()}mm.dispose()})})}
-  function rcLoad(j){const E=ESC[j];if(!E)return null;if(RC[j])return RC[j];if(!T.GLTFLoader)return null;
+  function rcLoad(j){const E=ESC[j];if(!E)return null;if(RC[j])return RC[j];if(!T.GLTFLoader||!USAR_GLB)return null;
     RC[j]=new Promise(ok=>{new T.GLTFLoader().load(E.arq,gl=>ok(gl.scene),undefined,e=>{console.warn("cenário 3D não carregou ("+E.arq+"); usando o cenário simples",e);ok(null)})});return RC[j]}
   function cena(j,g){const p=rcLoad(j);
     Object.keys(RC).forEach(k=>{if(+k!==j&&+k!==j+1){const q=RC[k];delete RC[k];q.then(m=>{if(m)rcDispose(m)})}});
     if(!p)return;p.then(m=>{if(m&&scn===g&&curJ===j)escApply(j,g,m)});
     if(ESC[j+1])setTimeout(()=>{if(curJ===j)rcLoad(j+1)},2500)}
+  // palco escuro: esconde o cenário distante e deixa só os elementos da história, com um cone de luz e poeira sobre o personagem
+  function palco(j,c){const p=new T.Vector3(),sz=new T.Vector3(),bb=new T.Box3();
+    scn.children.forEach(o=>{if(o.isLight||o.isPoints)return;bb.setFromObject(o);bb.getSize(sz);bb.getCenter(p);if(Math.hypot(p.x+1.5,p.z+1)>7.5||Math.max(sz.x,sz.y,sz.z)>10)o.visible=false});
+    put(scn,new T.ConeGeometry(2.6,9,28,1,true),BM(c.lc,.05),-1.5,4.5,0);put(scn,new T.CircleGeometry(3,32),BM(c.lc,.12),-1.5,.03,0).rotation.x=-Math.PI/2;
+    pts(scn,70,4.5,7,4.5,-1.5,0,0,c.lc,.04,0,.07,0)}
   function setScene(j){const c=SCN[j],x=SCX[j];
     if(scn){S.remove(scn);scn.traverse(o=>{if(o.geometry)o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];ms.forEach(m=>{m.dispose()})})}
-    scn=c.build();S.add(scn);scn.traverse(o=>{if(o.isMesh&&o.material&&!o.material.isMeshBasicMaterial&&!o.userData.ns){o.castShadow=true;o.receiveShadow=true}});ESC.forEach(e=>{e.on=false});cena(j,scn);
+    scn=c.build();S.add(scn);scn.traverse(o=>{if(o.isMesh&&o.material&&!o.material.isMeshBasicMaterial&&!o.userData.ns){o.castShadow=true;o.receiveShadow=true}});ESC.forEach(e=>{e.on=false});cena(j,scn);if(PALCO)palco(j,c);
     flo.visible=true;flo.position.y=0;look(c,x);burst3(c.tr);
     const fl=$("sgFl");if(fl){fl.style.setProperty("--fc",c.fc);fl.classList.remove("go");void fl.offsetWidth;fl.classList.add("go")}}
 
