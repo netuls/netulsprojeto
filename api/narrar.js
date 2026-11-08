@@ -16,7 +16,7 @@ const VOZES_CAP = [
   "03e6eaa7aeb149a1a8d13c166a5d947e",  // capítulo 3 (cap=2)
   "dece2a4c7f8d476b8da3c3a6707298d4",  // capítulo 4 (cap=3)
   "102bccca7dc64b6b8f8494c199c5d153",  // capítulo 5 (cap=4)
-  "ed827b0532324b12803bb9344a3a607f",  // capítulo 6 (cap=5)
+  "4b215a58407c4def88e0892def6421b2",  // capítulo 6 (cap=5)
   "d339e19362fc42dc8e3f4a6be653ff83",  // capítulo 7 (cap=6)
   "c1783e806b19495ea2db85ea2847ba01"   // capítulo 8 (cap=7)
 ];
